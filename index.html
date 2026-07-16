@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eating Disorder Clinical Insight & Information Tool</title>
+    
+    <!-- Load React, ReactDOM, Babel (for JSX), and Tailwind CSS -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState } = React;
+
+        // --- ICON COMPONENTS (Standalone SVGs for ease of copy/pasting) ---
+        const IconActivity = ({ className }) => <svg className={className} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>;
+        const IconBookOpen = ({ className }) => <svg className={className} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>;
+        const IconAlertTriangle = ({ className }) => <svg className={className} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>;
+        const IconCheckCircle = ({ className }) => <svg className={className} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>;
+        const IconInfo = ({ className }) => <svg className={className} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>;
+        const IconStethoscope = ({ className }) => <svg className={className} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4.8 2.3A.3.3 0 1 0 5 2H4a2 2 0 0 0-2 2v5a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6V4a2 2 0 0 0-2-2h-1a.2.2 0 1 0 .3.3"></path><path d="M8 15v1a6 6 0 0 0 6 6v0a6 6 0 0 0 6-6v-4"></path><circle cx="20" cy="10" r="2"></circle></svg>;
+        const IconChevronRight = ({ className }) => <svg className={className} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>;
+        const IconRefreshCw = ({ className }) => <svg className={className} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>;
+        const IconLightbulb = ({ className }) => <svg className={className} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1.3.5 2.6 1.5 3.5.8.8 1.3 1.5 1.5 2.5"></path><path d="M9 18h6"></path><path d="M10 22h4"></path></svg>;
+        const IconXCircle = ({ className }) => <svg className={className} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>;
+        const IconArrowLeft = ({ className }) => <svg className={className} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>;
+        const IconMessageCircle = ({ className }) => <svg className={className} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>;
+        const IconHeartPulse = ({ className }) => <svg className={className} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"></path><path d="M3.22 12H9.5l.5-1 2 4.5 2-7 1.5 3.5h5.27"></path></svg>;
+        const IconUsers = ({ className }) => <svg className={className} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>;
+        const IconHome = ({ className }) => <svg className={className} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>;
+        const IconShieldCheck = ({ className }) => <svg className={className} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path><path d="m9 12 2 2 4-4"></path></svg>;
+        const IconUtensils = ({ className }) => <svg className={className} xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 2v7c0 1.1.9 2 2 2h4a2 2 0 0 0 2-2V2"></path><path d="M7 2v20"></path><path d="M21 15V2v0a5 5 0 0 0-5 5v6c0 1.1.9 2 2 2h3Zm0 0v7"></path></svg>;
+
+        // --- DATA SOURCED FROM MEHLER & ANDERSEN (4TH ED), ADAPTED FOR THE PUBLIC ---
+        const DISORDER_DATABASE = [
+        {
+            id: 'an',
+            name: 'Anorexia Nervosa (AN)',
+            shortDesc: 'Characterized by severe restriction of food, leading to significant weight loss and an intense fear of gaining weight.',
+            criteria: [
+            'Severely limiting how much food you eat, leading to a very low body weight or significant weight loss.',
+            'An extreme fear of gaining weight, or constantly doing things to prevent weight gain.',
+            'Struggling to see your body\'s true size or shape, or not realizing how dangerous your current weight is.'
+            ],
+            subtypes: ['Restricting Type', 'Binge-Eating/Purging Type'],
+            medicalComplications: [
+            'Heart: Dangerously slow heart rate, low blood pressure, and physical damage to the heart muscle.',
+            'Bones: Thinning and weakening of the bones; stunted growth in younger people.',
+            'Brain: Shrinkage of the brain, making it hard to think clearly or concentrate.',
+            'Stomach: The stomach stops emptying normally, causing severe bloating, pain, and feeling full very fast.',
+            'Refeeding Risks: When starting to eat normally again, dangerous shifts in the body\'s minerals can happen, which requires a doctor\'s supervision.'
+            ],
+            warningSigns: [
+            'Wearing many layers of clothing to stay warm or hide weight loss.',
+            'Making excuses to avoid mealtimes or situations involving food.',
+            'Developing rigid rules around food (e.g., eating foods in a certain order, cutting food into tiny pieces).',
+            'Exercising obsessively, even when injured, sick, or exhausted.'
+            ],
+            emergencyAlert: 'Seek immediate medical care if you experience fainting, severe dizziness when standing up, chest pains, or a resting heart rate below 50 beats per minute.'
+        },
+        {
+            id: 'bn',
+            name: 'Bulimia Nervosa (BN)',
+            shortDesc: 'Involves a cycle of eating large amounts of food and then trying to "undo" the eating through purging, laxatives, or exercise.',
+            criteria: [
+            'Frequently eating very large amounts of food while feeling totally out of control.',
+            'Trying to "undo" the eating to prevent weight gain (like making yourself throw up, using laxatives, or exercising excessively).',
+            'These behaviors happen at least once a week for 3 months.',
+            'How you feel about yourself is heavily tied to your body shape and weight.'
+            ],
+            medicalComplications: [
+            'Heart/Blood: Dangerous drops in potassium levels, which can cause sudden heart attacks or abnormal heartbeats.',
+            'Throat/Stomach: Tears in the throat, severe heartburn, or long-term damage to the colon from abusing laxatives.',
+            'Mouth: Severe damage to tooth enamel and noticeably swollen cheeks or jaw glands.',
+            'Heart: Increased risk of heart issues, sometimes worsened by using diet pills.'
+            ],
+            warningSigns: [
+            'Frequently disappearing to the bathroom immediately after meals or taking showers after eating.',
+            'Finding hidden wrappers or noticing large amounts of food missing from the kitchen.',
+            'Using excessive amounts of mints, gum, or mouthwash.',
+            'Calluses or scrapes on the knuckles from making oneself throw up.'
+            ],
+            emergencyAlert: 'Seek immediate medical care if you notice blood in your vomit, experience sudden extreme weakness, or feel a fluttering/racing heartbeat (signs of a dangerous potassium drop).'
+        },
+        {
+            id: 'bed',
+            name: 'Binge Eating Disorder (BED)',
+            shortDesc: 'Involves frequent episodes of eating large amounts of food while feeling out of control, followed by severe guilt or distress.',
+            criteria: [
+            'Frequently eating very large amounts of food while feeling totally out of control.',
+            'Episodes often involve eating much faster than normal, eating until uncomfortably full, or eating alone out of embarrassment. People often feel deeply guilty or disgusted afterward.',
+            'Feeling very distressed and upset about these eating episodes.',
+            'Occurs at least once a week for 3 months, without making yourself throw up or over-exercising afterward.'
+            ],
+            medicalComplications: [
+            'Body Systems: Higher risk for Type 2 Diabetes, high blood pressure, and high cholesterol.',
+            'Stomach: Irritable bowel syndrome (IBS), severe heartburn, and gallbladder issues.',
+            'Heart: Increased risk of long-term heart disease.',
+            'Mental Health: Often happens alongside severe depression, anxiety, or substance use.'
+            ],
+            warningSigns: [
+            'Eating in secret or hiding food wrappers/containers in unusual places.',
+            'Noticeable discomfort eating around others or withdrawing from social activities.',
+            'Frequent dieting or extreme fasting following an episode of overeating.',
+            'Showing deep feelings of shame, disgust, or self-hatred about their body or eating habits.'
+            ],
+            emergencyAlert: 'Seek medical care if you experience severe, sudden stomach or abdominal pain, which can be a sign of a gallbladder attack or extreme gastric expansion.'
+        },
+        {
+            id: 'arfid',
+            name: 'Avoidant/Restrictive Food Intake Disorder (ARFID)',
+            shortDesc: 'A severe avoidance of food due to texture, smell, lack of interest, or fear of choking, NOT driven by body image concerns.',
+            criteria: [
+            'Avoiding food because of a lack of interest, a strong dislike of certain textures/smells, or an intense fear of negative consequences (like choking or throwing up).',
+            'Leads to serious weight loss, lacking essential vitamins, needing feeding tubes, or struggling to live a normal daily life.',
+            'Unlike Anorexia, this is NOT caused by a fear of gaining weight or poor body image.'
+            ],
+            medicalComplications: [
+            'Nutrition: Severe illnesses from lacking vitamins, such as scurvy or low iron (anemia).',
+            'Growth: Children and teens may stop growing or fail to hit developmental milestones.',
+            'Stomach: Chronic constipation and an extremely sensitive stomach that hurts often.',
+            'Heart: Dangerously slow heart rate and low blood pressure, just like Anorexia, due to a lack of overall nutrition.'
+            ],
+            warningSigns: [
+            'A very short list of "safe" foods that gets narrower over time.',
+            'Extreme anxiety, gagging, or panic attacks when presented with new or "unsafe" foods.',
+            'Complaining frequently of stomach aches or feeling full after only a few bites.',
+            'Significant weight loss or failing to grow properly without expressing any desire to be thin.'
+            ],
+            emergencyAlert: 'Seek immediate care if the person completely stops drinking fluids, shows extreme lethargy/confusion, or cannot keep any food down for over 24 hours.'
+        },
+        {
+            id: 'osfed',
+            name: 'Other Specified Feeding or Eating Disorder (OSFED)',
+            shortDesc: 'Includes severe eating disorders that cause intense distress but may not fit perfectly into one specific diagnostic category.',
+            criteria: [
+            'Having many serious signs of an eating disorder that cause intense pain or get in the way of life, but not fitting perfectly into one specific category.',
+            'Examples: "Atypical Anorexia" (having all the signs of Anorexia, but the person is at an average or higher weight), Purging Disorder, or Night Eating Syndrome.'
+            ],
+            medicalComplications: [
+            'Atypical Anorexia: People can suffer the exact same life-threatening heart and stomach damage as someone who is visibly underweight. This is often missed by doctors because the person doesn\'t "look" sick.',
+            'Purging Disorder: Carries the same dangerous risks of heart attacks and tooth decay as Bulimia.',
+            'General: Severe physical damage from malnutrition or purging happens at ALL body sizes.'
+            ],
+            warningSigns: [
+            'Obsessive focus on diet, exercise, and body shape that interferes with daily life.',
+            'Fluctuating weight combined with periods of extreme dieting or purging.',
+            'Waking up in the middle of the night to eat large amounts of food (Night Eating Syndrome).',
+            'Intense distress around food, even if their body weight has not drastically changed.'
+            ],
+            emergencyAlert: 'Do not ignore physical symptoms just because your weight is "average." Fainting, chest pain, or vomiting blood are medical emergencies regardless of your size.'
+        }
+        ];
+
+        const ASSESSMENT_QUESTIONS = [
+        { id: 'q1_restrict', text: 'Do you severely limit how much you eat, resulting in a very low weight or significant weight loss?' },
+        { id: 'q2_fear', text: 'Do you have an extreme fear of gaining weight, or does your body shape completely control how you feel about yourself?' },
+        { id: 'q3_binge', text: 'Do you often have times where you eat a very large amount of food and feel like you cannot stop?' },
+        { id: 'q4_compensate', text: 'Do you try to "undo" your eating by throwing up, taking laxatives, fasting, or exercising excessively?' },
+        { id: 'q5_sensory', text: 'Do you avoid eating because you just aren\'t interested, you hate the texture/smell of food, or you are terrified of choking or throwing up (unrelated to body image)?' },
+        { id: 'q6_distress', text: 'Does your relationship with food, eating, or your body cause you severe stress or interfere with your daily life and relationships?' }
+        ];
+
+        const MYTHS_DATABASE = [
+        {
+            myth: "You can tell if someone has an eating disorder just by looking at them.",
+            fact: "People at average or higher body weights can have severe, life-threatening eating disorders (such as Atypical Anorexia or Bulimia). Starvation and malnutrition damage the heart and organs regardless of the number on the scale. Doctors often miss these dangerous signs because the person doesn't 'look' sick."
+        },
+        {
+            myth: "If your lab results and blood work are normal, you aren't in any real physical danger.",
+            fact: "The human body is incredibly good at compensating and keeping basic blood work 'normal' until it is on the absolute verge of collapse. Having normal labs does not mean your heart or organs are safe. Medical monitoring needs to go beyond basic blood tests."
+        },
+        {
+            myth: "Eating disorders only happen to teenage girls.",
+            fact: "Eating disorders affect people of all ages, genders, and backgrounds. Men, for example, often go undiagnosed or present with an obsession over muscle mass (sometimes called 'reverse anorexia') and excessive exercise, which carries severe medical risks."
+        },
+        {
+            myth: "Using laxatives is an effective way to prevent weight gain after eating.",
+            fact: "Laxatives only work on the lower intestine after the body has already absorbed almost all the calories and nutrients from food. Abusing them does not stop weight gain; it only causes dangerous dehydration, loss of vital minerals (like potassium), and permanent colon damage."
+        },
+        {
+            myth: "Eating disorders are just a diet gone too far, a choice, or a vanity issue.",
+            fact: "Eating disorders are severe, biologically-based mental illnesses with some of the highest death rates of any psychiatric disorder. They are not a choice or a lifestyle. Recovery requires serious medical and psychological treatment, not just 'willpower.'"
+        }
+        ];
+
+        const THERAPY_DATABASE = [
+        {
+            category: "Levels of Care (When safety is the priority)",
+            treatments: [
+            {
+                name: "Inpatient Medical Stabilization & Psychiatric Care",
+                icon: <IconHeartPulse className="w-6 h-6 text-red-500" />,
+                description: "24/7 care in a hospital setting. This is required when a person is in a medical crisis (e.g., dangerously low heart rate, severe dehydration, fainting) or a psychiatric crisis (e.g., severe self-harm risks). Therapy cannot work if the brain is starving; physical safety must come first."
+            },
+            {
+                name: "Partial Hospitalization (PHP) & Intensive Outpatient (IOP)",
+                icon: <IconActivity className="w-6 h-6 text-orange-500" />,
+                description: "Structured programs where a person spends several hours a day, multiple days a week in treatment, but sleeps at home. These are for individuals who need intense daily support and meal supervision but are medically stable enough to not be in a hospital."
+            }
+            ]
+        },
+        {
+            category: "Specific Therapy Approaches",
+            treatments: [
+            {
+                name: "Cognitive Behavioral Therapy (CBT-E)",
+                icon: <IconMessageCircle className="w-6 h-6 text-indigo-500" />,
+                description: "The most common therapy for eating disorders. It helps you understand how your thoughts about your body and weight directly affect your feelings and eating habits. It focuses on breaking the cycle of restriction, bingeing, or purging by changing behaviors and challenging unhelpful thoughts."
+            },
+            {
+                name: "Dialectical Behavior Therapy (DBT)",
+                icon: <IconLightbulb className="w-6 h-6 text-emerald-500" />,
+                description: "A highly effective therapy for people who struggle with intense, overwhelming emotions. DBT teaches specific skills for managing stress, surviving crisis moments without relying on eating disorder behaviors, and improving relationships."
+            },
+            {
+                name: "Family-Based Treatment (FBT / Maudsley Approach)",
+                icon: <IconUsers className="w-6 h-6 text-blue-500" />,
+                description: "Often used as an intensive in-home approach for children and teenagers. Instead of putting the pressure solely on the child, FBT empowers parents and caregivers to take an active role in helping their child eat and restore their weight at home, making the family the core support system."
+            }
+            ]
+        }
+        ];
+
+        function App() {
+        const [activeTab, setActiveTab] = useState('info'); // 'info', 'assessment', 'myths', 'therapy', 'fbt'
+        const [selectedDisorder, setSelectedDisorder] = useState(null); 
+        const [answers, setAnswers] = useState({});
+        const [assessmentResult, setAssessmentResult] = useState(null);
+
+        const handleAnswer = (questionId, value) => {
+            setAnswers(prev => ({ ...prev, [questionId]: value }));
+        };
+
+        const calculateInsight = () => {
+            const q = answers;
+            
+            // Check if all questions are answered
+            if (Object.keys(q).length < ASSESSMENT_QUESTIONS.length) {
+            alert("Please answer all questions to see your results.");
+            return;
+            }
+
+            let primaryDiagnosis = '';
+            let medicalAlert = '';
+
+            if (q.q1_restrict && q.q2_fear) {
+            primaryDiagnosis = 'Signs point toward Anorexia Nervosa';
+            medicalAlert = 'High Risk for Severe Health Issues. Please see a doctor to check your heart rate and blood pressure. If you are starting to eat more, your body can experience dangerous mineral shifts, so medical supervision is highly recommended before starting therapy.';
+            } else if (q.q3_binge && q.q4_compensate) {
+            primaryDiagnosis = 'Signs point toward Bulimia Nervosa';
+            medicalAlert = 'High Risk for Heart Complications. Throwing up or using laxatives can cause dangerous drops in potassium, which can stop your heart. Please see a doctor immediately to check your blood levels and heart health.';
+            } else if (q.q3_binge && !q.q4_compensate) {
+            primaryDiagnosis = 'Signs point toward Binge Eating Disorder';
+            medicalAlert = 'Risk for stomach and long-term health issues. You may experience severe heartburn or IBS. Reaching out to a therapist or doctor can help manage these symptoms and support your mental health.';
+            } else if (q.q5_sensory && !q.q2_fear) {
+            primaryDiagnosis = 'Signs point toward ARFID (Avoidant/Restrictive Food Intake Disorder)';
+            medicalAlert = 'Risk for severe nutritional problems. Even without body image concerns, not getting enough food can cause the same dangerous heart and growth issues as Anorexia. A doctor\'s visit is strongly advised.';
+            } else if (q.q6_distress && (q.q1_restrict || q.q2_fear || q.q3_binge || q.q4_compensate || q.q5_sensory)) {
+            primaryDiagnosis = 'Signs point toward an Unspecified Eating Disorder (OSFED)';
+            medicalAlert = 'Eating disorders are incredibly dangerous at any size. You do not need to be visibly underweight to have life-threatening heart or stomach issues. A full medical checkup is highly recommended.';
+            } else if (q.q6_distress) {
+            primaryDiagnosis = 'Signs of Disordered Eating';
+            medicalAlert = 'While your answers might not perfectly match a specific eating disorder, the stress you are feeling is real and valid. Reaching out to a counselor or therapist could be very helpful.';
+            } else {
+            primaryDiagnosis = 'Low Risk for a Clinical Eating Disorder';
+            medicalAlert = 'Based on this brief screening, your answers do not strongly point to a major eating disorder. However, if you are struggling, always trust your gut and speak with a professional.';
+            }
+
+            setAssessmentResult({ diagnosis: primaryDiagnosis, alert: medicalAlert });
+        };
+
+        const resetAssessment = () => {
+            setAnswers({});
+            setAssessmentResult(null);
+        };
+
+        return (
+            <div className="min-h-screen bg-slate-50 font-sans text-slate-800">
+            {/* Header */}
+            <header className="bg-indigo-900 text-white py-6 shadow-md">
+                <div className="max-w-6xl mx-auto px-4">
+                <div className="flex items-center space-x-3 mb-2">
+                    <IconActivity className="w-8 h-8 text-indigo-300" />
+                    <h1 className="text-2xl font-bold tracking-wide">Eating Disorder Information & Screening Tool</h1>
+                </div>
+                <p className="text-indigo-200 text-sm max-w-2xl">
+                    Based on medical guidelines from <span className="italic">Eating Disorders: A Comprehensive Guide to Medical Care and Complications</span>. 
+                    Designed to help you understand different eating disorders and decide if it might be time to talk to a doctor or therapist.
+                </p>
+                </div>
+            </header>
+
+            {/* Navigation */}
+            <div className="bg-white border-b border-slate-200 sticky top-0 z-10 shadow-sm">
+                <div className="max-w-6xl mx-auto px-4 flex space-x-8 overflow-x-auto">
+                <button 
+                    onClick={() => { setActiveTab('info'); setSelectedDisorder(null); }}
+                    className={`py-4 px-2 font-semibold flex items-center space-x-2 border-b-4 transition-colors whitespace-nowrap ${activeTab === 'info' ? 'border-indigo-600 text-indigo-800' : 'border-transparent text-slate-500 hover:text-indigo-600'}`}
+                >
+                    <IconBookOpen className="w-5 h-5" />
+                    <span>Information Library</span>
+                </button>
+                <button 
+                    onClick={() => setActiveTab('assessment')}
+                    className={`py-4 px-2 font-semibold flex items-center space-x-2 border-b-4 transition-colors whitespace-nowrap ${activeTab === 'assessment' ? 'border-indigo-600 text-indigo-800' : 'border-transparent text-slate-500 hover:text-indigo-600'}`}
+                >
+                    <IconStethoscope className="w-5 h-5" />
+                    <span>Self-Screening Tool</span>
+                </button>
+                <button 
+                    onClick={() => setActiveTab('myths')}
+                    className={`py-4 px-2 font-semibold flex items-center space-x-2 border-b-4 transition-colors whitespace-nowrap ${activeTab === 'myths' ? 'border-indigo-600 text-indigo-800' : 'border-transparent text-slate-500 hover:text-indigo-600'}`}
+                >
+                    <IconLightbulb className="w-5 h-5" />
+                    <span>Myths vs. Facts</span>
+                </button>
+                <button 
+                    onClick={() => setActiveTab('therapy')}
+                    className={`py-4 px-2 font-semibold flex items-center space-x-2 border-b-4 transition-colors whitespace-nowrap ${activeTab === 'therapy' ? 'border-indigo-600 text-indigo-800' : 'border-transparent text-slate-500 hover:text-indigo-600'}`}
+                >
+                    <IconMessageCircle className="w-5 h-5" />
+                    <span>Therapy Options</span>
+                </button>
+                <button 
+                    onClick={() => setActiveTab('fbt')}
+                    className={`py-4 px-2 font-semibold flex items-center space-x-2 border-b-4 transition-colors whitespace-nowrap ${activeTab === 'fbt' ? 'border-indigo-600 text-indigo-800' : 'border-transparent text-slate-500 hover:text-indigo-600'}`}
+                >
+                    <IconHome className="w-5 h-5" />
+                    <span>FBT Home Guide</span>
+                </button>
+                </div>
+            </div>
+
+            {/* Main Content */}
+            <main className="max-w-6xl mx-auto px-4 py-8">
+                
+                {/* TAB 1: INFORMATION */}
+                {activeTab === 'info' && (
+                <div className="space-y-8">
+                    <div className="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-md">
+                    <div className="flex items-start">
+                        <IconInfo className="w-6 h-6 text-blue-600 mr-3 flex-shrink-0 mt-0.5" />
+                        <p className="text-sm text-blue-900 leading-relaxed">
+                        <strong>Important Note:</strong> Eating disorders are serious illnesses that affect both the mind and the body. Medical emergencies can happen at <em>any</em> body weight. Therapy is important, but making sure your body is physically safe with the help of a doctor is just as crucial.
+                        </p>
+                    </div>
+                    </div>
+
+                    {!selectedDisorder ? (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {DISORDER_DATABASE.map((disorder) => (
+                        <div key={disorder.id} className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col hover:shadow-md transition-all hover:-translate-y-1">
+                            <div className="bg-indigo-50 px-6 py-4 border-b border-indigo-100 flex-grow-0">
+                            <h2 className="text-lg font-bold text-indigo-900 leading-tight">{disorder.name}</h2>
+                            </div>
+                            <div className="p-6 flex-grow flex flex-col justify-between">
+                            <p className="text-slate-600 text-sm mb-6">{disorder.shortDesc}</p>
+                            <button 
+                                onClick={() => setSelectedDisorder(disorder)}
+                                className="w-full bg-indigo-100 hover:bg-indigo-200 text-indigo-800 font-semibold py-2 px-4 rounded transition-colors flex items-center justify-center"
+                            >
+                                Learn More <IconChevronRight className="w-4 h-4 ml-1" />
+                            </button>
+                            </div>
+                        </div>
+                        ))}
+                    </div>
+                    ) : (
+                    <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                        <div className="bg-indigo-900 px-6 py-6 flex flex-col md:flex-row md:items-center justify-between text-white">
+                        <div>
+                            <h2 className="text-2xl font-bold">{selectedDisorder.name}</h2>
+                            {selectedDisorder.subtypes && (
+                            <p className="text-indigo-200 text-sm mt-1">Common Subtypes: {selectedDisorder.subtypes.join(', ')}</p>
+                            )}
+                        </div>
+                        <button 
+                            onClick={() => setSelectedDisorder(null)}
+                            className="mt-4 md:mt-0 bg-indigo-800 hover:bg-indigo-700 text-white px-4 py-2 rounded-lg flex items-center transition-colors text-sm font-semibold border border-indigo-700"
+                        >
+                            <IconArrowLeft className="w-4 h-4 mr-2" /> Back to Library
+                        </button>
+                        </div>
+                        
+                        <div className="p-6 md:p-8 grid grid-cols-1 md:grid-cols-2 gap-8">
+                        <div className="space-y-8">
+                            <div>
+                            <h3 className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-4 border-b pb-2">Diagnostic Criteria</h3>
+                            <ul className="space-y-3">
+                                {selectedDisorder.criteria.map((crit, idx) => (
+                                <li key={idx} className="flex items-start text-sm text-slate-700">
+                                    <IconChevronRight className="w-4 h-4 text-indigo-400 mr-2 flex-shrink-0 mt-0.5" />
+                                    <span>{crit}</span>
+                                </li>
+                                ))}
+                            </ul>
+                            </div>
+
+                            <div className="bg-yellow-50 p-5 rounded-lg border border-yellow-200">
+                            <h3 className="text-sm font-bold text-yellow-800 uppercase tracking-wider mb-3 flex items-center">
+                                <IconActivity className="w-4 h-4 mr-2" />
+                                Common Warning Signs
+                            </h3>
+                            <ul className="space-y-2">
+                                {selectedDisorder.warningSigns.map((sign, idx) => (
+                                <li key={idx} className="flex items-start text-sm text-yellow-900">
+                                    <div className="w-1.5 h-1.5 rounded-full bg-yellow-500 mr-2 mt-1.5 flex-shrink-0" />
+                                    <span>{sign}</span>
+                                </li>
+                                ))}
+                            </ul>
+                            </div>
+                        </div>
+
+                        <div className="space-y-8">
+                            <div className="bg-red-50 p-5 rounded-lg border border-red-100">
+                            <h3 className="text-sm font-bold text-red-800 uppercase tracking-wider mb-4 flex items-center">
+                                <IconAlertTriangle className="w-4 h-4 mr-2" />
+                                Medical Complications
+                            </h3>
+                            <ul className="space-y-3">
+                                {selectedDisorder.medicalComplications.map((comp, idx) => (
+                                <li key={idx} className="flex items-start text-sm text-red-900">
+                                    <div className="w-1.5 h-1.5 rounded-full bg-red-400 mr-2 mt-1.5 flex-shrink-0" />
+                                    <span>{comp}</span>
+                                </li>
+                                ))}
+                            </ul>
+                            </div>
+
+                            <div className="bg-orange-600 p-5 rounded-lg text-white shadow-inner">
+                            <h3 className="text-sm font-bold uppercase tracking-wider mb-2 flex items-center">
+                                <IconStethoscope className="w-4 h-4 mr-2" />
+                                When to Seek Emergency Care
+                            </h3>
+                            <p className="text-sm text-orange-50 font-medium leading-relaxed">
+                                {selectedDisorder.emergencyAlert}
+                            </p>
+                            </div>
+                        </div>
+                        </div>
+                    </div>
+                    )}
+                </div>
+                )}
+
+                {/* TAB 2: ASSESSMENT */}
+                {activeTab === 'assessment' && (
+                <div className="max-w-3xl mx-auto">
+                    
+                    {!assessmentResult ? (
+                    <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden p-6 md:p-8">
+                        <div className="mb-8 border-b border-slate-100 pb-6">
+                        <h2 className="text-2xl font-bold text-slate-800 mb-2">Screening Questionnaire</h2>
+                        <p className="text-slate-500 text-sm">
+                            This tool helps identify signs of common eating disorders. 
+                            Answer the following based on your behaviors over the past 3 months.
+                        </p>
+                        </div>
+
+                        <div className="space-y-8">
+                        {ASSESSMENT_QUESTIONS.map((q, index) => (
+                            <div key={q.id} className="bg-slate-50 p-5 rounded-lg border border-slate-100">
+                            <p className="font-medium text-slate-800 mb-4">
+                                <span className="text-indigo-600 mr-2">{index + 1}.</span> 
+                                {q.text}
+                            </p>
+                            <div className="flex space-x-4">
+                                <button
+                                onClick={() => handleAnswer(q.id, true)}
+                                className={`flex-1 py-3 px-4 rounded-md font-medium transition-all ${answers[q.id] === true ? 'bg-indigo-600 text-white shadow-md' : 'bg-white text-slate-600 border border-slate-300 hover:bg-slate-100'}`}
+                                >
+                                Yes
+                                </button>
+                                <button
+                                onClick={() => handleAnswer(q.id, false)}
+                                className={`flex-1 py-3 px-4 rounded-md font-medium transition-all ${answers[q.id] === false ? 'bg-indigo-600 text-white shadow-md' : 'bg-white text-slate-600 border border-slate-300 hover:bg-slate-100'}`}
+                                >
+                                No
+                                </button>
+                            </div>
+                            </div>
+                        ))}
+                        </div>
+
+                        <div className="mt-10">
+                        <button 
+                            onClick={calculateInsight}
+                            className="w-full bg-indigo-700 hover:bg-indigo-800 text-white font-bold py-4 px-6 rounded-lg shadow-md transition-colors flex justify-center items-center text-lg"
+                        >
+                            Generate Clinical Insight
+                            <IconChevronRight className="ml-2 w-5 h-5" />
+                        </button>
+                        </div>
+                    </div>
+                    ) : (
+                    <div className="bg-white rounded-xl shadow-lg border border-slate-200 overflow-hidden">
+                        <div className="bg-emerald-500 px-6 py-8 text-center text-white">
+                        <IconCheckCircle className="w-16 h-16 mx-auto mb-4 opacity-90" />
+                        <h2 className="text-3xl font-bold mb-2">Insight Generated</h2>
+                        <p className="text-emerald-100 font-medium">Screening complete based on provided answers.</p>
+                        </div>
+
+                        <div className="p-8">
+                        <div className="mb-8">
+                            <h3 className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-2">Diagnostic Indicator</h3>
+                            <div className="text-2xl font-bold text-indigo-900 bg-indigo-50 inline-block px-4 py-2 rounded-lg border border-indigo-100">
+                            {assessmentResult.diagnosis}
+                            </div>
+                        </div>
+
+                        <div className="bg-orange-50 border-l-4 border-orange-500 p-5 rounded-r-lg mb-8">
+                            <h3 className="text-lg font-bold text-orange-900 mb-2 flex items-center">
+                            <IconActivity className="w-5 h-5 mr-2" />
+                            Health & Safety Alert
+                            </h3>
+                            <p className="text-orange-800 leading-relaxed">
+                            {assessmentResult.alert}
+                            </p>
+                        </div>
+
+                        <div className="bg-slate-50 p-5 rounded-lg border border-slate-200 mb-8 text-sm text-slate-600">
+                            <h4 className="font-bold text-slate-800 mb-2">Important Disclaimer</h4>
+                            <p className="mb-2">
+                            This screening tool is meant to provide helpful information and insight. 
+                            </p>
+                            <p>
+                            It is <strong>not</strong> a medical diagnosis. Because eating disorders can cause severe, sometimes hidden damage to the heart and other organs, it is incredibly important to see a medical doctor to make sure your body is safe, even if you are already seeing a therapist.
+                            </p>
+                        </div>
+
+                        <button 
+                            onClick={resetAssessment}
+                            className="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold py-4 px-6 rounded-lg transition-colors flex justify-center items-center"
+                        >
+                            <IconRefreshCw className="mr-2 w-5 h-5" />
+                            Start New Assessment
+                        </button>
+                        </div>
+                    </div>
+                    )}
+                </div>
+                )}
+
+                {/* TAB 3: MYTHS VS FACTS */}
+                {activeTab === 'myths' && (
+                <div className="max-w-4xl mx-auto">
+                    <div className="mb-8 text-center">
+                    <h2 className="text-3xl font-bold text-slate-800 mb-4">Common Myths & Medical Facts</h2>
+                    <p className="text-slate-600 max-w-2xl mx-auto">
+                        There are many dangerous misconceptions about eating disorders. Understanding the medical truth can help reduce stigma and encourage people to seek the life-saving care they need.
+                    </p>
+                    </div>
+
+                    <div className="space-y-6">
+                    {MYTHS_DATABASE.map((item, index) => (
+                        <div key={index} className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden flex flex-col md:flex-row">
+                        <div className="bg-red-50 p-6 md:w-2/5 border-b md:border-b-0 md:border-r border-red-100 flex flex-col justify-center">
+                            <div className="flex items-center text-red-700 font-bold mb-2">
+                            <IconXCircle className="w-5 h-5 mr-2" />
+                            MYTH
+                            </div>
+                            <p className="text-red-900 font-medium text-lg italic">"{item.myth}"</p>
+                        </div>
+                        <div className="bg-emerald-50 p-6 md:w-3/5 flex flex-col justify-center">
+                            <div className="flex items-center text-emerald-700 font-bold mb-2">
+                            <IconCheckCircle className="w-5 h-5 mr-2" />
+                            MEDICAL FACT
+                            </div>
+                            <p className="text-emerald-900 leading-relaxed">{item.fact}</p>
+                        </div>
+                        </div>
+                    ))}
+                    </div>
+                    
+                    <div className="mt-8 bg-indigo-50 p-6 rounded-xl border border-indigo-100 text-center">
+                    <p className="text-indigo-900 font-medium">
+                        If you or someone you know is struggling with an eating disorder, do not wait for the "stereotypical" warning signs. Reach out to a doctor or mental health professional today.
+                    </p>
+                    </div>
+                </div>
+                )}
+
+                {/* TAB 4: THERAPY & TREATMENT */}
+                {activeTab === 'therapy' && (
+                <div className="max-w-5xl mx-auto">
+                    <div className="mb-8 border-b border-slate-200 pb-6">
+                    <h2 className="text-3xl font-bold text-slate-800 mb-4">Therapy & Treatment Options</h2>
+                    <p className="text-slate-600 max-w-3xl leading-relaxed">
+                        Recovering from an eating disorder requires a team approach. Because these illnesses attack both the mind and the body, treatment almost always involves a therapist (like an LCSW or psychologist), a medical doctor, and a registered dietitian working together. Below is a guide to the different levels of care and types of therapy available.
+                    </p>
+                    </div>
+
+                    <div className="space-y-10">
+                    {THERAPY_DATABASE.map((section, idx) => (
+                        <div key={idx}>
+                        <h3 className="text-xl font-bold text-indigo-900 mb-6 flex items-center border-b-2 border-indigo-100 pb-2 inline-block">
+                            {section.category}
+                        </h3>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            {section.treatments.map((treatment, tIdx) => (
+                            <div key={tIdx} className="bg-white rounded-xl shadow-sm border border-slate-200 p-6 hover:shadow-md transition-shadow">
+                                <div className="flex items-center mb-4">
+                                <div className="bg-slate-50 p-3 rounded-lg border border-slate-100 mr-4">
+                                    {treatment.icon}
+                                </div>
+                                <h4 className="text-lg font-bold text-slate-800">{treatment.name}</h4>
+                                </div>
+                                <p className="text-slate-600 leading-relaxed text-sm">
+                                {treatment.description}
+                                </p>
+                            </div>
+                            ))}
+                        </div>
+                        </div>
+                    ))}
+                    </div>
+
+                    <div className="mt-10 bg-blue-50 border-l-4 border-blue-500 p-6 rounded-r-xl">
+                    <div className="flex items-start">
+                        <IconInfo className="w-6 h-6 text-blue-600 mr-3 flex-shrink-0 mt-1" />
+                        <div>
+                        <h4 className="font-bold text-blue-900 mb-1">A Note on Finding Help</h4>
+                        <p className="text-sm text-blue-800 leading-relaxed">
+                            If you are reaching out for help, it is incredibly important to be honest with your treatment team about all of your symptoms. Medical doctors need to rule out life-threatening complications before outpatient therapy can be safe and effective.
+                        </p>
+                        </div>
+                    </div>
+                    </div>
+                </div>
+                )}
+
+                {/* TAB 5: FBT HOME GUIDE */}
+                {activeTab === 'fbt' && (
+                <div className="max-w-5xl mx-auto">
+                    <div className="bg-indigo-900 text-white rounded-xl p-8 mb-8 shadow-md">
+                    <div className="flex items-center space-x-4 mb-4">
+                        <IconHome className="w-10 h-10 text-indigo-300" />
+                        <h2 className="text-3xl font-bold">Family-Based Treatment (FBT) Guide</h2>
+                    </div>
+                    <p className="text-indigo-100 text-lg leading-relaxed max-w-3xl">
+                        Often called the "Maudsley Approach," FBT is the gold-standard treatment for children and teenagers with Anorexia and Bulimia. It empowers parents to act as the primary recovery team right at the dining room table. This guide explains how to do this intensive in-home intervention.
+                    </p>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+                    <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                        <h3 className="text-xl font-bold text-slate-800 mb-3 flex items-center">
+                        <IconShieldCheck className="w-6 h-6 text-emerald-500 mr-2" />
+                        Externalize the Illness
+                        </h3>
+                        <p className="text-slate-600 text-sm leading-relaxed">
+                        In FBT, parents learn to separate their child from the eating disorder. When your child yells, refuses food, or lies about eating, you must view it as the <em>"Eating Disorder Voice"</em> talking, not your child. This helps parents remain deeply compassionate toward their child while being completely unyielding against the illness.
+                        </p>
+                    </div>
+                    <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                        <h3 className="text-xl font-bold text-slate-800 mb-3 flex items-center">
+                        <IconUtensils className="w-6 h-6 text-blue-500 mr-2" />
+                        Food is Medicine
+                        </h3>
+                        <p className="text-slate-600 text-sm leading-relaxed">
+                        You would never let a child refuse life-saving chemotherapy. In FBT, food is viewed exactly the same way: as a non-negotiable, life-saving medicine. The parents' primary job is to ensure the "medicine" is taken, regardless of the child's distress or bargaining.
+                        </p>
+                    </div>
+                    </div>
+
+                    <h3 className="text-2xl font-bold text-slate-800 mb-6 border-b-2 border-slate-200 pb-2">The Three Phases of FBT</h3>
+                    
+                    <div className="space-y-6 mb-12">
+                    <div className="bg-red-50 border-l-4 border-red-500 p-6 rounded-r-xl">
+                        <h4 className="text-xl font-bold text-red-900 mb-2">Phase 1: Full Parental Control (Weight Restoration)</h4>
+                        <p className="text-red-800 mb-4">
+                        This is the hardest and most intensive phase. Because the child's brain is starving, they cannot make rational decisions about food. Parents take 100% control over shopping, cooking, plating, and supervising all meals and snacks.
+                        </p>
+                        <ul className="space-y-2 text-sm text-red-900">
+                        <li className="flex items-start"><IconChevronRight className="w-4 h-4 mr-1 mt-0.5 flex-shrink-0" /> Parents decide exactly what is eaten, how much, and when.</li>
+                        <li className="flex items-start"><IconChevronRight className="w-4 h-4 mr-1 mt-0.5 flex-shrink-0" /> The child is not allowed to negotiate portion sizes or ingredients.</li>
+                        <li className="flex items-start"><IconChevronRight className="w-4 h-4 mr-1 mt-0.5 flex-shrink-0" /> Exercise is strictly limited or completely paused until medical stability is reached.</li>
+                        </ul>
+                    </div>
+
+                    <div className="bg-orange-50 border-l-4 border-orange-500 p-6 rounded-r-xl">
+                        <h4 className="text-xl font-bold text-orange-900 mb-2">Phase 2: Returning Control</h4>
+                        <p className="text-orange-800 mb-4">
+                        Once the child's weight is mostly restored and eating disorder behaviors (like restricting, hiding food, or purging) have significantly dropped, parents slowly begin handing back age-appropriate independence.
+                        </p>
+                        <ul className="space-y-2 text-sm text-orange-900">
+                        <li className="flex items-start"><IconChevronRight className="w-4 h-4 mr-1 mt-0.5 flex-shrink-0" /> The child might start plating their own food under parental supervision.</li>
+                        <li className="flex items-start"><IconChevronRight className="w-4 h-4 mr-1 mt-0.5 flex-shrink-0" /> The child may be allowed to have a meal independently at school.</li>
+                        <li className="flex items-start"><IconChevronRight className="w-4 h-4 mr-1 mt-0.5 flex-shrink-0" /> If behaviors return or weight drops, parents immediately take control back (returning to Phase 1 briefly).</li>
+                        </ul>
+                    </div>
+
+                    <div className="bg-emerald-50 border-l-4 border-emerald-500 p-6 rounded-r-xl">
+                        <h4 className="text-xl font-bold text-emerald-900 mb-2">Phase 3: Establishing Healthy Independence</h4>
+                        <p className="text-emerald-800 mb-4">
+                        This phase begins when weight is fully restored, behaviors are gone, and the child is managing their own food. The focus shifts to normal teenage development and relapse prevention.
+                        </p>
+                        <ul className="space-y-2 text-sm text-emerald-900">
+                        <li className="flex items-start"><IconChevronRight className="w-4 h-4 mr-1 mt-0.5 flex-shrink-0" /> Addressing how the eating disorder impacted social life and getting the child back into normal activities.</li>
+                        <li className="flex items-start"><IconChevronRight className="w-4 h-4 mr-1 mt-0.5 flex-shrink-0" /> Creating a plan for what to do if warning signs reappear in the future.</li>
+                        </ul>
+                    </div>
+                    </div>
+
+                    <h3 className="text-2xl font-bold text-slate-800 mb-6 border-b-2 border-slate-200 pb-2">Practical Mealtime Strategies for Parents</h3>
+                    <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+                    <div className="p-6 md:p-8 space-y-8">
+                        
+                        <div>
+                        <h4 className="text-lg font-bold text-indigo-900 mb-3 flex items-center">
+                            <span className="bg-indigo-100 text-indigo-800 w-8 h-8 rounded-full flex items-center justify-center mr-3 text-sm">1</span>
+                            The Unified Front
+                        </h4>
+                        <p className="text-slate-600 text-sm leading-relaxed ml-11">
+                            Both parents/caregivers must be in total agreement. The eating disorder will look for any crack in the armor to exploit. If one parent says "she has to eat everything" and the other says "just let her leave a little," the disorder wins. Plan meals and boundaries in private, away from the child.
+                        </p>
+                        </div>
+
+                        <div>
+                        <h4 className="text-lg font-bold text-indigo-900 mb-3 flex items-center">
+                            <span className="bg-indigo-100 text-indigo-800 w-8 h-8 rounded-full flex items-center justify-center mr-3 text-sm">2</span>
+                            The Magic Plate
+                        </h4>
+                        <p className="text-slate-600 text-sm leading-relaxed ml-11">
+                            Parents prepare the plate entirely. Do not ask the child, "What do you want to eat?" or "Is this too much?" Bring the completed plate to the table. The only expectation is that 100% of the food on the plate is finished.
+                        </p>
+                        </div>
+
+                        <div>
+                        <h4 className="text-lg font-bold text-indigo-900 mb-3 flex items-center">
+                            <span className="bg-indigo-100 text-indigo-800 w-8 h-8 rounded-full flex items-center justify-center mr-3 text-sm">3</span>
+                            Distraction and De-escalation
+                        </h4>
+                        <p className="text-slate-600 text-sm leading-relaxed ml-11">
+                            Meals will cause your child intense anxiety. <strong>Do not talk about food, calories, or weight at the table.</strong> Play a word game, watch a lighthearted TV show, talk about a pet, or play 20 Questions. Your job is to stay entirely calm, like a pilot navigating turbulence. If you panic or get angry, their anxiety spikes further.
+                        </p>
+                        </div>
+
+                        <div>
+                        <h4 className="text-lg font-bold text-indigo-900 mb-3 flex items-center">
+                            <span className="bg-indigo-100 text-indigo-800 w-8 h-8 rounded-full flex items-center justify-center mr-3 text-sm">4</span>
+                            Post-Meal Monitoring
+                        </h4>
+                        <p className="text-slate-600 text-sm leading-relaxed ml-11">
+                            The time immediately after a meal is the highest risk period for purging (throwing up) or compensatory exercise. A parent must supervise the child for 30 to 60 minutes after every meal. This means sitting in the living room together, keeping bathroom doors open, and stopping any pacing or standing.
+                        </p>
+                        </div>
+
+                    </div>
+                    </div>
+
+                    <div className="mt-8 bg-slate-50 p-6 rounded-lg border border-slate-200 text-sm text-slate-600">
+                    <h4 className="font-bold text-slate-800 mb-2">Clinical Safety Disclaimer</h4>
+                    <p>
+                        While FBT is an in-home therapy, it should <strong>always</strong> be done under the guidance of a trained therapist and a medical doctor. Before starting weight restoration at home, a doctor must physically clear the child to ensure they are not at risk for <em>Refeeding Syndrome</em>, a dangerous physical reaction to eating after starvation.
+                    </p>
+                    </div>
+
+                </div>
+                )}
+            </main>
+            </div>
+        );
+        }
+
+        // Render the app
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
